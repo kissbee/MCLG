@@ -1,13 +1,13 @@
 function  Test_MCLG(dataname, X, Y )
-% Input£º     X£ºdata matrix
-%             Y£ºtruth label
-% Output:     result£ºclustering result
+% InputÂ£Âº     XÂ£Âºdata matrix
+%             YÂ£Âºtruth label
+% Output:     resultÂ£Âºclustering result
 
 %       k	beta mu alpha lambda gamma
 %BRCA	6 	100 0.001  0.001  0.001  0.005
 %CESC	18 	10 10  0.1  1  0.5
 %HW2sources	15 	500  10  0.5  10  50
-%HW	7 	1000  0.001  1000  0.001  0.001
+%HW	7 	1000 0.001 1000 0.001 0.001
 %MSRC_v1	5 	0.001  0.001  0.01  0.001  0.0005
 %MSRC	14 	50 500  1  50  500
 %NGs	10 	50  0.001  0.5  0.1 0.0005
