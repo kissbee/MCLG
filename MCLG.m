@@ -199,11 +199,11 @@ while iter<=maxIter
     end
     tempObj = tempObj + mu*sumXWAZ;
     
-    sumGSU = 0;% item 4
+    summvGv = zeros(n,n);% item 4
     for iv = 1:V
-        sumGSU = sumGSU + mv(iv)*norm(Gv{iv}+S-U,'fro')^2;
+        summvGv = summvGv + mv(iv)*Gv{iv};
     end
-    tempObj = tempObj + alpha*sumGSU;
+    tempObj = tempObj + alpha*norm(summvGv+S-U);
     
     D = diag(sum(U));% item 5
     Lu = D-U; 
