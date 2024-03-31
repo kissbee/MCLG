@@ -203,7 +203,7 @@ while iter<=maxIter
     for iv = 1:V
         summvGv = summvGv + mv(iv)*Gv{iv};
     end
-    tempObj = tempObj + alpha*norm(summvGv+S-U);
+    tempObj = tempObj + norm(summvGv+alpha*(S-U),'fro')^2;
     
     D = diag(sum(U));% item 5
     Lu = D-U; 
