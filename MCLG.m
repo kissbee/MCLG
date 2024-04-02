@@ -1,14 +1,13 @@
-function  H = MCLG(dataname,X,Y,Gv,S,Fv,beta,mu,alpha,lambda,gamma,theta) %
-         % Output: Z^T
+function  H = MCLG(dataname,X,Y,Gv,S,Fv,beta,mu,alpha,lambda,gamma,theta)
 
 V = size(X,2);      % view number
 c = max(Y);         % class number
 n = length(Y);      % object number
 
 %% =========================Initialization==========================
-% Mv Wv Qv ...
+% Mv nv Qv
 for iv=1:V
-    dv(iv) = size(X{iv},1); % dimension of each view
+    dv(iv) = size(X{iv}, 1); % dimension of each view
     Wv{iv} = ones(dv(iv), c);
     Mv{iv} = ones(dv(iv), c);
     Qv{iv} = ones(c, c);
@@ -66,14 +65,15 @@ while iter<=maxIter
     for iv = 1:V
         sumGv = sumGv + mv(iv)* Gv{iv};
     end
-    U = (-0.5*theta*Q+alpha*S+sumGv)/alpha;
-    U = (abs(U)+abs(U'))/2.0;  
+    U = -0.5*Q+alpha*S+sumGv;%
+    U = (abs(U)+abs(U'))/2.0;%对称
     
     % Updating Mv
     for iv = 1:V
         I = eye(dv(iv));
         Mv{iv} = 1.0/pv(iv) * inv(1.0/pv(iv)*X{iv}*X{iv}'+beta*I)*X{iv}*F;
-        
+    
+        % 对Mv施加一个约束
         %Mv{iv}(Mv{iv}<0) = 0;
     end
     
@@ -86,7 +86,7 @@ while iter<=maxIter
     
     [~,y] = eig(L);
     m = diag(y);
-    lamdaMax = max(m); % 
+    lamdaMax = max(m); % 求得L最大特征
     
     %%%C
     C1 = zeros(n, c);
@@ -127,7 +127,7 @@ while iter<=maxIter
     
     [~,y] = eig(L);
     m = diag(y);
-    lamdaMax = max(m); % 
+    lamdaMax = max(m); % 求得L最大特征
     
     %%%C
     C1 = zeros(n, c);
@@ -139,7 +139,7 @@ while iter<=maxIter
         C2 = C2 + nv(iv)*(Fv{iv}*Qv{iv}+F);
     end
     
-    C = mu*C1+lambda*C2;%
+    C = mu*C1+lambda*C2;%迹项没参数
 
     %%%calculate
     H1 = ones(n,c);
@@ -165,18 +165,42 @@ while iter<=maxIter
         Qv{iv} = inv(Fv{iv}'*Fv{iv})*(Fv{iv}'*Z'-Fv{iv}'*F);
     end
     
-    % Updating nv mv pv
+    % Updating pv qv nv rv 
     for iv = 1:V
         hv(iv) = norm(X{iv}'* Mv{iv}-F,'fro');
     end
     for iv = 1:V
         pv(iv) = hv(iv)/sum(hv);
         qv(iv) = 0.5/norm(X{iv}-Wv{iv}*A*Z,'fro');
-        mv(iv) = 0.5/norm(Gv{iv}+S-U,'fro');
         nv(iv) = 0.5/norm(Fv{iv}*Qv{iv}+F-Z','fro');
         rv(iv) = 0.5/sqrt(trace(Z*LGv{iv}*Z'));
     end
     
+    %************* mv
+    QP_options = 'quadprog';
+    %QP_options = 'SimplexQP_acc';
+    for iv = 1:V
+        Gv{iv} = sparse(Gv{iv});
+    end
+    GG = sparse(n * n, V);
+    for iv = 1:V
+        GG(:,iv) = reshape(Gv{iv},[n*n 1]);
+    end
+    newGG = GG'* GG;
+    p = reshape(alpha*S-U,[n*n 1]);
+    s = 2*GG'*p;
+    %QP_options
+    switch lower(QP_options)
+        case {lower('SimplexQP_acc')}
+            mv_iv = SimplexQP_acc(newGG, s);
+            
+        case {lower('quadprog')}
+            options = optimset( 'Algorithm','interior-point-convex','Display','off');
+            mv_iv = quadprog(2*newGG,-s,[],[],ones(1,V),1,zeros(V,1),ones(V,1),[],options);            
+    end 
+    mv = mv_iv;
+    %disp(mv')
+
     % calculating obj value
     tempObj = 0;
     
@@ -203,7 +227,7 @@ while iter<=maxIter
     for iv = 1:V
         summvGv = summvGv + mv(iv)*Gv{iv};
     end
-    tempObj = tempObj + norm(summvGv+alpha*(S-U),'fro')^2;
+    tempObj = tempObj + norm(summvGv+alpha*S-U,'fro')^2;
     
     D = diag(sum(U));% item 5
     Lu = D-U; 
@@ -222,9 +246,11 @@ while iter<=maxIter
     tempObj = tempObj + gamma * sumZLGvZ;
     
     obj(iter) = tempObj;
-    fprintf(fp, '%.6f,%.6f,%.6f,%.6f,%.6f,%0.6f,%0.6f\n', beta,mu,alpha,lambda,gamma,theta,obj(iter)); 
+    fprintf(fp, '%.6f,%.6f,%.6f,%.6f,%.6f,%0.6f,%0.6f\n', beta,mu,alpha,lambda,gamma,theta,obj(iter)); % 一行两个数据，用逗号分隔；每行结束后加上\n换行
 
     % convergence checking
+    %disp(iter);
+    %disp(obj(iter));
     if iter>1 && abs(obj(iter)-obj(iter-1))/obj(iter-1) < 1e-3 %
         break;
     end
