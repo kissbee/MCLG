@@ -6,10 +6,10 @@ function  Test_MCLG(dataname, X, Y )
 k = 6;
 
 beta=100;
-mu=0.001;
-alpha=0.001;
-lambda=0.001;
-gamma=0.005;
+mu=0.005;
+alpha=0.00005;
+lambda=0.005;
+gamma=0.01;
 theta=1;%fixed
 
 
