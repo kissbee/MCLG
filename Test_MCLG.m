@@ -3,18 +3,6 @@ function  Test_MCLG(dataname, X, Y )
 %             Y£ºtruth label
 % Output:     result£ºclustering result
 
-%       k	beta mu alpha lambda gamma
-%BRCA	6 	100 0.001  0.001  0.001  0.005
-%CESC	18 	10 10  0.1  1  0.5
-%HW2sources	15 	500  10  0.5  10  50
-%HW	7 	1000 0.001 1000 0.001 0.001
-%MSRC_v1	5 	0.001  0.001  0.01  0.001  0.0005
-%MSRC	14 	50 500  1  50  500
-%NGs	10 	50  0.001  0.5  0.1 0.0005
-%Reuters	10 	1000  0.001  1  0.001  0.00005
-%WikipediaArticles	43 	0.005  0.1  10  0.05  0.05
-%YaleB	6 	10  0.5  0.05  5  0.005
-
 k = 6;
 
 beta=100;
