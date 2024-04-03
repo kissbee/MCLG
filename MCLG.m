@@ -187,7 +187,7 @@ while iter<=maxIter
         GG(:,iv) = reshape(Gv{iv},[n*n 1]);
     end
     newGG = GG'* GG;
-    p = reshape(alpha*S-U,[n*n 1]);
+    p = reshape(-alpha*S+U,[n*n 1]);
     s = 2*GG'*p;
     %QP_options
     switch lower(QP_options)
